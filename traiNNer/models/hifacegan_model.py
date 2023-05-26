@@ -142,17 +142,17 @@ class HiFaceGANModel(SRModel):
                         l_g_total += l_g_style
                         loss_dict['l_g_style'] = l_g_style
 
-            # Requires real prediction for feature matching loss
-            pred_fake, pred_real = self.discriminate(self.lq, self.output, self.gt)
-            l_g_gan = self.cri_gan(pred_fake, True, is_disc=False)
-            l_g_total += l_g_gan
-            loss_dict['l_g_gan'] = l_g_gan
+                # Requires real prediction for feature matching loss
+                pred_fake, pred_real = self.discriminate(self.lq, self.output, self.gt)
+                l_g_gan = self.cri_gan(pred_fake, True, is_disc=False)
+                l_g_total += l_g_gan
+                loss_dict['l_g_gan'] = l_g_gan
 
-            # feature matching loss
-            if self.cri_feat:
-                l_g_feat = self.cri_feat(pred_fake, pred_real)
-                l_g_total += l_g_feat
-                loss_dict['l_g_feat'] = l_g_feat
+                # feature matching loss
+                if self.cri_feat:
+                    l_g_feat = self.cri_feat(pred_fake, pred_real)
+                    l_g_total += l_g_feat
+                    loss_dict['l_g_feat'] = l_g_feat
 
             l_g_total.backward()
             self.optimizer_g.step()

@@ -247,11 +247,11 @@ class RealESRGANModel(SRGANModel):
                     l_g_avg = self.cri_avg(self.output, self.gt)
                     l_g_total += l_g_avg
                     loss_dict['l_g_avg'] = l_g_avg
-            # gan loss
-            fake_g_pred = self.net_d(self.output)
-            l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)
-            l_g_total += l_g_gan
-            loss_dict['l_g_gan'] = l_g_gan
+                # gan loss
+                fake_g_pred = self.net_d(self.output)
+                l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)
+                l_g_total += l_g_gan
+                loss_dict['l_g_gan'] = l_g_gan
 
             l_g_total.backward()
             self.optimizer_g.step()
