@@ -102,44 +102,45 @@ class SRGANModel(SRModel):
         for p in self.net_d.parameters():
             p.requires_grad = False
 
-        self.optimizer_g.zero_grad()
-        self.output = self.net_g(self.lq)
+        with torch.autocast():
+            self.optimizer_g.zero_grad()
+            self.output = self.net_g(self.lq)
 
-        l_g_total = 0
-        loss_dict = OrderedDict()
-        if (current_iter % self.net_d_iters == 0 and current_iter > self.net_d_init_iters):
-            # pixel loss
-            if self.cri_pix:
-                l_g_pix = self.cri_pix(self.output, self.gt)
-                l_g_total += l_g_pix
-                loss_dict['l_g_pix'] = l_g_pix
-            # perceptual loss
-            if self.cri_perceptual:
-                l_g_percep, l_g_style = self.cri_perceptual(self.output, self.gt)
-                if l_g_percep is not None:
-                    l_g_total += l_g_percep
-                    loss_dict['l_g_percep'] = l_g_percep
-                if l_g_style is not None:
-                    l_g_total += l_g_style
-                    loss_dict['l_g_style'] = l_g_style
-            # contextual loss
-            if self.cri_contextual:
-                l_g_contextual = self.cri_contextual(self.output, self.gt)
-                l_g_total += l_g_contextual
-                loss_dict['l_g_contextual'] = l_g_contextual
-            if self.cri_color:
-                l_g_color = self.cri_color(self.output, self.gt)
-                l_g_total += l_g_color
-                loss_dict['l_g_color'] = l_g_color
-            if self.cri_avg:
-                l_g_avg = self.cri_avg(self.output, self.gt)
-                l_g_total += l_g_avg
-                loss_dict['l_g_avg'] = l_g_avg
-            # gan loss
-            fake_g_pred = self.net_d(self.output)
-            l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)
-            l_g_total += l_g_gan
-            loss_dict['l_g_gan'] = l_g_gan
+            l_g_total = 0
+            loss_dict = OrderedDict()
+            if (current_iter % self.net_d_iters == 0 and current_iter > self.net_d_init_iters):
+                # pixel loss
+                if self.cri_pix:
+                    l_g_pix = self.cri_pix(self.output, self.gt)
+                    l_g_total += l_g_pix
+                    loss_dict['l_g_pix'] = l_g_pix
+                # perceptual loss
+                if self.cri_perceptual:
+                    l_g_percep, l_g_style = self.cri_perceptual(self.output, self.gt)
+                    if l_g_percep is not None:
+                        l_g_total += l_g_percep
+                        loss_dict['l_g_percep'] = l_g_percep
+                    if l_g_style is not None:
+                        l_g_total += l_g_style
+                        loss_dict['l_g_style'] = l_g_style
+                # contextual loss
+                if self.cri_contextual:
+                    l_g_contextual = self.cri_contextual(self.output, self.gt)
+                    l_g_total += l_g_contextual
+                    loss_dict['l_g_contextual'] = l_g_contextual
+                if self.cri_color:
+                    l_g_color = self.cri_color(self.output, self.gt)
+                    l_g_total += l_g_color
+                    loss_dict['l_g_color'] = l_g_color
+                if self.cri_avg:
+                    l_g_avg = self.cri_avg(self.output, self.gt)
+                    l_g_total += l_g_avg
+                    loss_dict['l_g_avg'] = l_g_avg
+                # gan loss
+                fake_g_pred = self.net_d(self.output)
+                l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)
+                l_g_total += l_g_gan
+                loss_dict['l_g_gan'] = l_g_gan
 
             l_g_total.backward()
             self.optimizer_g.step()

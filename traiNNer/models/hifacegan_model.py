@@ -118,40 +118,41 @@ class HiFaceGANModel(SRModel):
         for p in self.net_d.parameters():
             p.requires_grad = False
 
-        self.optimizer_g.zero_grad()
-        self.output = self.net_g(self.lq)
+        with torch.autocast():
+            self.optimizer_g.zero_grad()
+            self.output = self.net_g(self.lq)
 
-        l_g_total = 0
-        loss_dict = OrderedDict()
+            l_g_total = 0
+            loss_dict = OrderedDict()
 
-        if (current_iter % self.net_d_iters == 0 and current_iter > self.net_d_init_iters):
-            # pixel loss
-            if self.cri_pix:
-                l_g_pix = self.cri_pix(self.output, self.gt)
-                l_g_total += l_g_pix
-                loss_dict['l_g_pix'] = l_g_pix
+            if (current_iter % self.net_d_iters == 0 and current_iter > self.net_d_init_iters):
+                # pixel loss
+                if self.cri_pix:
+                    l_g_pix = self.cri_pix(self.output, self.gt)
+                    l_g_total += l_g_pix
+                    loss_dict['l_g_pix'] = l_g_pix
 
-            # perceptual loss
-            if self.cri_perceptual:
-                l_g_percep, l_g_style = self.cri_perceptual(self.output, self.gt)
-                if l_g_percep is not None:
-                    l_g_total += l_g_percep
-                    loss_dict['l_g_percep'] = l_g_percep
-                if l_g_style is not None:
-                    l_g_total += l_g_style
-                    loss_dict['l_g_style'] = l_g_style
+                # perceptual loss
+                if self.cri_perceptual:
+                    l_g_percep, l_g_style = self.cri_perceptual(self.output, self.gt)
+                    if l_g_percep is not None:
+                        l_g_total += l_g_percep
+                        loss_dict['l_g_percep'] = l_g_percep
+                    if l_g_style is not None:
+                        l_g_total += l_g_style
+                        loss_dict['l_g_style'] = l_g_style
 
-            # Requires real prediction for feature matching loss
-            pred_fake, pred_real = self.discriminate(self.lq, self.output, self.gt)
-            l_g_gan = self.cri_gan(pred_fake, True, is_disc=False)
-            l_g_total += l_g_gan
-            loss_dict['l_g_gan'] = l_g_gan
+                # Requires real prediction for feature matching loss
+                pred_fake, pred_real = self.discriminate(self.lq, self.output, self.gt)
+                l_g_gan = self.cri_gan(pred_fake, True, is_disc=False)
+                l_g_total += l_g_gan
+                loss_dict['l_g_gan'] = l_g_gan
 
-            # feature matching loss
-            if self.cri_feat:
-                l_g_feat = self.cri_feat(pred_fake, pred_real)
-                l_g_total += l_g_feat
-                loss_dict['l_g_feat'] = l_g_feat
+                # feature matching loss
+                if self.cri_feat:
+                    l_g_feat = self.cri_feat(pred_fake, pred_real)
+                    l_g_total += l_g_feat
+                    loss_dict['l_g_feat'] = l_g_feat
 
             l_g_total.backward()
             self.optimizer_g.step()

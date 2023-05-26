@@ -105,40 +105,41 @@ class SRModel(BaseModel):
             self.gt = data['gt'].to(self.device)
 
     def optimize_parameters(self, current_iter):
-        self.optimizer_g.zero_grad()
-        self.output = self.net_g(self.lq)
+        with torch.autocast():
+            self.optimizer_g.zero_grad()
+            self.output = self.net_g(self.lq)
 
-        l_total = 0
-        loss_dict = OrderedDict()
-        # pixel loss
-        if self.cri_pix:
-            l_pix = self.cri_pix(self.output, self.gt)
-            l_total += l_pix
-            loss_dict['l_pix'] = l_pix
+            l_total = 0
+            loss_dict = OrderedDict()
+            # pixel loss
+            if self.cri_pix:
+                l_pix = self.cri_pix(self.output, self.gt)
+                l_total += l_pix
+                loss_dict['l_pix'] = l_pix
 
-        # perceptual loss
-        if self.cri_perceptual:
-            l_percep, l_style = self.cri_perceptual(self.output, self.gt)
-            if l_percep is not None:
-                l_total += l_percep
-                loss_dict['l_percep'] = l_percep
-            if l_style is not None:
-                l_total += l_style
-                loss_dict['l_style'] = l_style
+            # perceptual loss
+            if self.cri_perceptual:
+                l_percep, l_style = self.cri_perceptual(self.output, self.gt)
+                if l_percep is not None:
+                    l_total += l_percep
+                    loss_dict['l_percep'] = l_percep
+                if l_style is not None:
+                    l_total += l_style
+                    loss_dict['l_style'] = l_style
 
-            # contextual loss
-            if self.cri_contextual:
-                l_contextual = self.cri_contextual(self.output, self.gt)
-                l_total += l_contextual
-                loss_dict['l_contextual'] = l_contextual
-            if self.cri_color:
-                l_color = self.cri_color(self.output, self.gt)
-                l_total += l_color
-                loss_dict['l_color'] = l_color
-            if self.cri_avg:
-                l_avg = self.cri_avg(self.output, self.gt)
-                l_total += l_avg
-                loss_dict['l_avg'] = l_avg
+                # contextual loss
+                if self.cri_contextual:
+                    l_contextual = self.cri_contextual(self.output, self.gt)
+                    l_total += l_contextual
+                    loss_dict['l_contextual'] = l_contextual
+                if self.cri_color:
+                    l_color = self.cri_color(self.output, self.gt)
+                    l_total += l_color
+                    loss_dict['l_color'] = l_color
+                if self.cri_avg:
+                    l_avg = self.cri_avg(self.output, self.gt)
+                    l_total += l_avg
+                    loss_dict['l_avg'] = l_avg
 
         l_total.backward()
         self.optimizer_g.step()
