@@ -150,7 +150,7 @@ class SRGANModel(SRModel):
             p.requires_grad = True
 
         self.optimizer_d.zero_grad()
-            with torch.autocast(device_type='cuda', dtype=torch.float16):
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
             # real
             real_d_pred = self.net_d(self.gt)
             l_d_real = self.cri_gan(real_d_pred, True, is_disc=True)
