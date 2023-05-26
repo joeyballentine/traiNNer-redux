@@ -138,11 +138,11 @@ class VideoRecurrentGANModel(VideoRecurrentModel):
                     if l_g_style is not None:
                         l_g_total += l_g_style
                         loss_dict['l_g_style'] = l_g_style
-                # gan loss
-                fake_g_pred = self.net_d(self.output.view(-1, c, h, w))
-                l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)
-                l_g_total += l_g_gan
-                loss_dict['l_g_gan'] = l_g_gan
+            # gan loss
+            fake_g_pred = self.net_d(self.output.view(-1, c, h, w))
+            l_g_gan = self.cri_gan(fake_g_pred, True, is_disc=False)
+            l_g_total += l_g_gan
+            loss_dict['l_g_gan'] = l_g_gan
 
             l_g_total.backward()
             self.optimizer_g.step()

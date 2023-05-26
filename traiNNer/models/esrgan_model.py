@@ -47,15 +47,16 @@ class ESRGANModel(SRGANModel):
                     l_g_avg = self.cri_avg(self.output, self.gt)
                     l_g_total += l_g_avg
                     loss_dict['l_g_avg'] = l_g_avg
-                # gan loss (relativistic gan)
-                real_d_pred = self.net_d(self.gt).detach()
-                fake_g_pred = self.net_d(self.output)
-                l_g_real = self.cri_gan(real_d_pred - torch.mean(fake_g_pred), False, is_disc=False)
-                l_g_fake = self.cri_gan(fake_g_pred - torch.mean(real_d_pred), True, is_disc=False)
-                l_g_gan = (l_g_real + l_g_fake) / 2
 
-                l_g_total += l_g_gan
-                loss_dict['l_g_gan'] = l_g_gan
+            # gan loss (relativistic gan)
+            real_d_pred = self.net_d(self.gt).detach()
+            fake_g_pred = self.net_d(self.output)
+            l_g_real = self.cri_gan(real_d_pred - torch.mean(fake_g_pred), False, is_disc=False)
+            l_g_fake = self.cri_gan(fake_g_pred - torch.mean(real_d_pred), True, is_disc=False)
+            l_g_gan = (l_g_real + l_g_fake) / 2
+
+            l_g_total += l_g_gan
+            loss_dict['l_g_gan'] = l_g_gan
 
             l_g_total.backward()
             self.optimizer_g.step()
