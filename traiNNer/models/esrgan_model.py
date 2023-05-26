@@ -74,14 +74,17 @@ class ESRGANModel(SRGANModel):
         # we separate the backwards for real and fake, and also detach the
         # tensor for calculating mean.
 
-        # real
-        fake_d_pred = self.net_d(self.output).detach()
-        real_d_pred = self.net_d(self.gt)
+        with torch.autocast("cuda"):
+            # real
+            fake_d_pred = self.net_d(self.output).detach()
+            real_d_pred = self.net_d(self.gt)
         l_d_real = self.cri_gan(real_d_pred - torch.mean(fake_d_pred), True, is_disc=True) * 0.5
         l_d_real.backward()
-        # fake
-        fake_d_pred = self.net_d(self.output.detach())
-        l_d_fake = self.cri_gan(fake_d_pred - torch.mean(real_d_pred.detach()), False, is_disc=True) * 0.5
+
+        with torch.autocast("cuda"):
+            # fake
+            fake_d_pred = self.net_d(self.output.detach())
+            l_d_fake = self.cri_gan(fake_d_pred - torch.mean(real_d_pred.detach()), False, is_disc=True) * 0.5
         l_d_fake.backward()
         self.optimizer_d.step()
 

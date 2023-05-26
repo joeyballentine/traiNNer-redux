@@ -150,15 +150,17 @@ class SRGANModel(SRModel):
             p.requires_grad = True
 
         self.optimizer_d.zero_grad()
-        # real
-        real_d_pred = self.net_d(self.gt)
-        l_d_real = self.cri_gan(real_d_pred, True, is_disc=True)
+            with torch.autocast("cuda"):
+            # real
+            real_d_pred = self.net_d(self.gt)
+            l_d_real = self.cri_gan(real_d_pred, True, is_disc=True)
         loss_dict['l_d_real'] = l_d_real
         loss_dict['out_d_real'] = torch.mean(real_d_pred.detach())
         l_d_real.backward()
-        # fake
-        fake_d_pred = self.net_d(self.output.detach())
-        l_d_fake = self.cri_gan(fake_d_pred, False, is_disc=True)
+        with torch.autocast("cuda"):
+            # fake
+            fake_d_pred = self.net_d(self.output.detach())
+            l_d_fake = self.cri_gan(fake_d_pred, False, is_disc=True)
         loss_dict['l_d_fake'] = l_d_fake
         loss_dict['out_d_fake'] = torch.mean(fake_d_pred.detach())
         l_d_fake.backward()
