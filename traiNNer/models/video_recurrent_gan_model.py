@@ -114,8 +114,8 @@ class VideoRecurrentGANModel(VideoRecurrentModel):
                 logger.warning('Train all the parameters.')
                 self.net_g.requires_grad_(True)
 
+        self.optimizer_g.zero_grad()
         with torch.autocast():
-            self.optimizer_g.zero_grad()
             self.output = self.net_g(self.lq)
 
             _, _, c, h, w = self.output.size()

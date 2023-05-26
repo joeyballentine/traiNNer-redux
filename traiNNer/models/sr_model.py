@@ -105,8 +105,8 @@ class SRModel(BaseModel):
             self.gt = data['gt'].to(self.device)
 
     def optimize_parameters(self, current_iter):
+        self.optimizer_g.zero_grad()
         with torch.autocast():
-            self.optimizer_g.zero_grad()
             self.output = self.net_g(self.lq)
 
             l_total = 0

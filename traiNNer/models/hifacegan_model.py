@@ -118,8 +118,8 @@ class HiFaceGANModel(SRModel):
         for p in self.net_d.parameters():
             p.requires_grad = False
 
+        self.optimizer_g.zero_grad()
         with torch.autocast():
-            self.optimizer_g.zero_grad()
             self.output = self.net_g(self.lq)
 
             l_g_total = 0

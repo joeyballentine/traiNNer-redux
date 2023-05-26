@@ -206,8 +206,8 @@ class RealESRGANModel(SRGANModel):
         for p in self.net_d.parameters():
             p.requires_grad = False
 
+        self.optimizer_g.zero_grad()
         with torch.autocast():
-            self.optimizer_g.zero_grad()
             self.output = self.net_g(self.lq)
             if self.cri_ldl:
                 self.output_ema = self.net_g_ema(self.lq)
