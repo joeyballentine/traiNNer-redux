@@ -115,7 +115,7 @@ class VideoRecurrentGANModel(VideoRecurrentModel):
                 self.net_g.requires_grad_(True)
 
         self.optimizer_g.zero_grad()
-        with torch.autocast():
+        with torch.autocast("cuda"):
             self.output = self.net_g(self.lq)
 
             _, _, c, h, w = self.output.size()

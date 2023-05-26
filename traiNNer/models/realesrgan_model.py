@@ -207,7 +207,7 @@ class RealESRGANModel(SRGANModel):
             p.requires_grad = False
 
         self.optimizer_g.zero_grad()
-        with torch.autocast():
+        with torch.autocast("cuda"):
             self.output = self.net_g(self.lq)
             if self.cri_ldl:
                 self.output_ema = self.net_g_ema(self.lq)

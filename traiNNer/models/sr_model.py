@@ -106,7 +106,7 @@ class SRModel(BaseModel):
 
     def optimize_parameters(self, current_iter):
         self.optimizer_g.zero_grad()
-        with torch.autocast():
+        with torch.autocast("cuda"):
             self.output = self.net_g(self.lq)
 
             l_total = 0

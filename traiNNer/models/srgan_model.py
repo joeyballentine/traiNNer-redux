@@ -103,7 +103,7 @@ class SRGANModel(SRModel):
             p.requires_grad = False
 
         self.optimizer_g.zero_grad()
-        with torch.autocast():
+        with torch.autocast("cuda"):
             self.output = self.net_g(self.lq)
 
             l_g_total = 0
