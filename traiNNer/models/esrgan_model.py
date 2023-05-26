@@ -15,7 +15,7 @@ class ESRGANModel(SRGANModel):
             p.requires_grad = False
 
         self.optimizer_g.zero_grad()
-        with torch.autocast("cuda"):
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
             self.output = self.net_g(self.lq)
 
             l_g_total = 0
@@ -74,14 +74,14 @@ class ESRGANModel(SRGANModel):
         # we separate the backwards for real and fake, and also detach the
         # tensor for calculating mean.
 
-        with torch.autocast("cuda"):
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
             # real
             fake_d_pred = self.net_d(self.output).detach()
             real_d_pred = self.net_d(self.gt)
         l_d_real = self.cri_gan(real_d_pred - torch.mean(fake_d_pred), True, is_disc=True) * 0.5
         l_d_real.backward()
 
-        with torch.autocast("cuda"):
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
             # fake
             fake_d_pred = self.net_d(self.output.detach())
             l_d_fake = self.cri_gan(fake_d_pred - torch.mean(real_d_pred.detach()), False, is_disc=True) * 0.5

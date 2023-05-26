@@ -209,7 +209,7 @@ class OmniSRModel(SRGANModel):
             p.requires_grad = False
 
         self.optimizer_g.zero_grad()
-        with torch.autocast("cuda"):
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
             self.output = self.net_g(self.lq)
             if self.cri_ldl:
                 self.output_ema = self.net_g_ema(self.lq)
@@ -263,14 +263,14 @@ class OmniSRModel(SRGANModel):
             p.requires_grad = True
 
         self.optimizer_d.zero_grad()
-        with torch.autocast("cuda"):
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
             # real
             real_d_pred = self.net_d(gan_gt)
             l_d_real = self.cri_gan(real_d_pred, True, is_disc=True)
         loss_dict['l_d_real'] = l_d_real
         loss_dict['out_d_real'] = torch.mean(real_d_pred.detach())
         l_d_real.backward()
-        with torch.autocast("cuda"):
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
             # fake
             fake_d_pred = self.net_d(self.output.detach().clone())  # clone for pt1.9
             l_d_fake = self.cri_gan(fake_d_pred, False, is_disc=True)
