@@ -1,3 +1,6 @@
+# This project is deprecated. Please use https://github.com/the-database/traiNNer-redux instead.
+
+
 <p align="center">
   <img src="assets/basicsr_xpixel_logo.png" height=120>
 </p>
